@@ -19,6 +19,7 @@
 #include "util/u_debug.h"
 #include "util/u_dynarray.h"
 #include "agx_builder.h"
+#include "g17/g17_compile.h"
 #include "agx_compiler.h"
 #include "agx_debug.h"
 #include "agx_nir.h"
@@ -3490,7 +3491,10 @@ agx_compile_function_nir(nir_shader *nir, nir_function_impl *impl,
    }
 
    unsigned offset = agx_pad_binary(binary, AGX_CODE_ALIGN);
-   agx_pack_binary(ctx, binary);
+   if (key->dev.is_g17)
+      g17_pack_binary(ctx, binary);
+   else
+      agx_pack_binary(ctx, binary);
 
    unsigned nr_gprs = ctx->max_reg + 1;
 
@@ -3524,6 +3528,12 @@ agx_compile_function_nir(nir_shader *nir, nir_function_impl *impl,
 #else
    bool selftest = false;
 #endif
+
+   /* The disassembler is G13-only; it can't read G17 machine code. */
+   if (key->dev.is_g17) {
+      dump_shaders = false;
+      selftest = false;
+   }
 
    if (dump_shaders || selftest) {
       FILE *fp = selftest ? fopen("/dev/null", "w") : stdout;

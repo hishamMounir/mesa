@@ -107,9 +107,10 @@ idep_agx_builder_h = declare_dependency(
 
 libasahi_compiler = static_library(
   'asahi_compiler',
-  [libasahi_agx_files, agx_opcodes_c, agx_nir_algebraic_c],
-  dependencies: [idep_asahi_debug, idep_nir, idep_agx_opcodes_h, idep_agx_builder_h, idep_mesautil, idep_libagx, idep_libpoly],
-  link_with : [libagx2_disasm],
+  [libasahi_agx_files, agx_opcodes_c, agx_nir_algebraic_c, 'g17/g17_compile.c'],
+  dependencies: [idep_asahi_debug, idep_nir, idep_agx_opcodes_h, idep_agx_builder_h, idep_mesautil, idep_libagx, idep_libpoly,
+                 idep_g17_isa_h],
+  link_with : [libagx2_disasm, libasahi_g17],
   c_args : [no_override_init_args, '-Wno-c2x-extensions'],
   gnu_symbol_visibility : 'hidden',
   build_by_default : false,
@@ -251,6 +252,22 @@ if with_tests
       c_args : [c_msvc_compat_args, no_override_init_args],
       gnu_symbol_visibility : 'hidden',
       dependencies: [idep_gtest, idep_nir, idep_agx_opcodes_h, idep_agx_builder_h, idep_mesautil],
+      link_with : [libasahi_compiler],
+    ),
+    suite : ['asahi'],
+    protocol : 'gtest',
+  )
+
+  test(
+    'g17_pack_tests',
+    executable(
+      'g17_pack_tests',
+      files('g17/test/test-g17-pack.cpp'),
+      include_directories : include_directories('test'),
+      c_args : [c_msvc_compat_args, no_override_init_args],
+      gnu_symbol_visibility : 'hidden',
+      dependencies : [idep_gtest, idep_nir, idep_agx_opcodes_h, idep_agx_builder_h, idep_mesautil,
+                      idep_g17_isa_h],
       link_with : [libasahi_compiler],
     ),
     suite : ['asahi'],

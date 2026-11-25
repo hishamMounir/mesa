@@ -412,6 +412,14 @@ enum agx_shader_isa {
 struct agx_device_key {
    enum agx_shader_isa shader_isa;
 
+   /* Target the G17 (Apple M5) instruction encoding. The front-end (NIR ->
+    * AGX IR, optimization, scheduling, RA) is shared; only the final
+    * machine-code packing differs (g17_pack_binary vs agx_pack_binary).
+    * Only a compute subset packs (see g17/g17_compile.c). The G17 backend has
+    * no 64-bit integer add, so G17 shaders must be created with all 64-bit
+    * integer arithmetic lowered (lower_int64_options = ~0). */
+   bool is_g17;
+
    /* Does the target GPU need explicit cluster coherency for atomics?
     * Only used on G13X.
     */
