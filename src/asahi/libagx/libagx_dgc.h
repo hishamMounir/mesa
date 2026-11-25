@@ -222,6 +222,8 @@ enum agx_chip {
    AGX_CHIP_G17P,
    /* Append to retain existing chip values in precompiled inputs. */
    AGX_CHIP_G16C,
+   /* Apple M5 (T8142). Recognized only; see agx_open_device. */
+   AGX_CHIP_G17G,
 };
 
 static inline GLOBAL uint32_t *

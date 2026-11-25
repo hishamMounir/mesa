@@ -571,8 +571,9 @@ agx_open_device(void *memctx, struct agx_device *dev)
                                                : AGX_CHIP_G16G;
       break;
    case 17:
-      assert(dev->params.gpu_variant == 'P');
-      dev->chip = AGX_CHIP_G17P;
+      assert(dev->params.gpu_variant == 'P' || dev->params.gpu_variant == 'G');
+      dev->chip =
+         dev->params.gpu_variant == 'G' ? AGX_CHIP_G17G : AGX_CHIP_G17P;
       break;
    default:
       UNREACHABLE("Unsupported AGX generation");
@@ -601,6 +602,15 @@ agx_open_device(void *memctx, struct agx_device *dev)
             dev->params.gpu_generation - 12, variant,
             dev->params.gpu_generation, dev->params.gpu_variant,
             dev->params.gpu_revision + 0xA0);
+
+   /* G17G is recognized, but no command path drives it yet: M5 ignores the
+    * Apple9 launch records, and how it selects a compute main is still
+    * unknown. Refuse instead of submitting work the GPU would misexecute.
+    */
+   if (dev->chip == AGX_CHIP_G17G) {
+      fprintf(stderr, "%s: no supported command path yet\n", dev->name);
+      return false;
+   }
 
    /* We need a large chunk of VA space carved out for robustness. Hardware
     * loads can shift an i32 by up to 2, for a total shift of 4. If the base
