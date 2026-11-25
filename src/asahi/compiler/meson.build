@@ -59,6 +59,8 @@ libasahi_agx_files = files(
   'agx_validate_ra.c',
 )
 
+subdir('g17')
+
 agx_nir_algebraic_c = custom_target(
   input : 'agx_nir_algebraic.py',
   output : 'agx_nir_algebraic.c',
